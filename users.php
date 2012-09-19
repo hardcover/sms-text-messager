@@ -173,10 +173,10 @@ foreach ($stmt as $row) {
     if ($user != "admin") {
         $rowcount++;
         echo '  <form action="' . $uri . 'users.php" method="post">' . "\n";
-        echo '    <p><span class="rp">' . html($fullName, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8") . " - Full name<br />\n";
-        echo '    ' . html($user, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8") . " - User name, count: $rowcount<br />\n";
+        echo '    <p><span class="rp">' . html($fullName) . " - Full name<br />\n";
+        echo '    ' . html($user) . " - User name, count: $rowcount<br />\n";
         echo "    The password is $printPass<br />\n";
-        echo '    <input name="user" type="hidden" value="' . html($user, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8") . '" /><input type="submit" value="Edit" name="edit" class="button" /></span></p>' . "\n";
+        echo '    <input name="user" type="hidden" value="' . html($user) . '" /><input type="submit" value="Edit" name="edit" class="button" /></span></p>' . "\n";
         echo "  </form>\n\n";
     }
 }
