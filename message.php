@@ -116,7 +116,7 @@ echo "</p>\n";
 $dbh = null;
 ?>
 
-    <p>600 character limit, 160 suggested: <span id="counterMessage"></span><br />
+    <p>600 character limit, 120 suggested maximum: <span id="counterMessage"></span><br />
     <textarea id="message" name="message" rows="15" cols="35" maxlength="601"><?php echo html($_POST['message']); ?></textarea></p>
 
     <p><input type="submit" value="Send message" name="send" class="button" /></p>
