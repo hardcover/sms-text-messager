@@ -10,7 +10,7 @@ body, select, input, button, textarea, span, p.e {
     font-family: Menlo, "Lucida Grande", "Segoe UI Regular", Verdana, Arial, Helvetica, clean, sans-serif;
 }
 
-p, li, span.rb, span.rp {
+p, li, span.b, span.rb, span.rp {
     line-height: 1.5em;
     font-family: Georgia, "Times New Roman", serif;
 }
@@ -204,6 +204,11 @@ img.b, input, textarea {
 span {
     font-weight: bold;
     font-family: Menlo, "Lucida Grande", "Segoe UI Regular", Verdana, Arial, Helvetica, clean, sans-serif;
+}
+
+span.b {
+    font-weight: normal;
+    display: inline-block;
 }
 
 span.g, span.r, span.rb, span.rp, span.t {

@@ -23,8 +23,7 @@
  */
 function html($str)
 {
-    $str = htmlentities($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
-    return $str;
+    return htmlentities($str, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5, "UTF-8");
 }
 /**
  * Function to echo information and error messages, when they exist
