@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-08-21 database A
+ * @version   GIT: 2012-10-7 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -48,7 +48,7 @@ if (isset($_POST['user'], $_POST['pass'])) {
     $row = $stmt->fetch();
     $dbh = null;
     if ($hash == $row['pass']) {
-        $_SESSION['auth'] = $row['idUser'] . $row['user'];
+        $_SESSION['auth'] = $row['idUser'] . $row['user'] . $_SERVER['REMOTE_ADDR'];
         $_SESSION['userIdS'] = $row['idUser'];
         $_SESSION['userS'] = $row['user'];
         $host = $_SERVER["HTTP_HOST"];
