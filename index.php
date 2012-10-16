@@ -15,15 +15,17 @@
  * @link      http://hardcoverwebdesign.com/
  */
 session_start();
-if (isset($_SESSION['auth']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or isset($_SERVER['HTTP_VIA']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
-    include 'logout.php';
+require 'z/includes/INPUTS.php';
+$uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
+if (isset($_SESSION['auth']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
+    require 'z/includes/INPUTS.php';
+    $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
+    header('Location: ' . $uri . 'logout.php');
 }
 //
 // Programs
 //
 require 'z/includes/functions.inc';
-require 'z/includes/INPUTS.php';
-$uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
 $message = false;
 require 'z/includes/db.php';
 $dbh = new PDO($db);

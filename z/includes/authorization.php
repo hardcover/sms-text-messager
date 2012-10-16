@@ -23,7 +23,9 @@ $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_
 //
 // Test authorization
 //
-if (!isset($_SESSION['auth']) or ($_SESSION['auth'] != $_SESSION['userIdS'] . $_SESSION['userS'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or isset($_SERVER['HTTP_VIA']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
-    header("Location: http://$host$path/logout.php");
+if (!isset($_SESSION['auth']) or ($_SESSION['auth'] != $_SESSION['userIdS'] . $_SESSION['userS'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
+    require 'z/includes/INPUTS.php';
+    $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
+    header('Location: ' . $uri . 'logout.php');
 }
 ?>
