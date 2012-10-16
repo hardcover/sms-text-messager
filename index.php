@@ -75,7 +75,7 @@ if (isset($_POST['user'], $_POST['pass'])) {
     $stmt->execute(array($userPost));
     $row = $stmt->fetch();
     $dbh = null;
-    if ($hash === $row['pass']) {
+    if (strval($hash) === strval($row['pass'])) {
         $dbh = new PDO($dbl);
         $stmt = $dbh->prepare('UPDATE login SET time=? WHERE user=?');
         $stmt->execute(array(null, $userPost));
