@@ -6,15 +6,14 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <info@hardcoverwebdesign.com>
+ * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-7 database A
+ * @version   GIT: 2012-10-15 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
-session_start();
 require 'z/includes/authorization.php';
 //
 // Programs
@@ -28,10 +27,10 @@ if (isset($_POST['adminPass']) and ($_POST['adminPass'] == null or $_POST['admin
 //
 // Prepare post data
 //
-$userPost = isset($_POST['user']) ? stripslashes($_POST['user']) : null;
-$passPost = isset($_POST['pass']) ? stripslashes($_POST['pass']) : null;
-$adminPassPost = isset($_POST['adminPass']) ? stripslashes($_POST['adminPass']) : null;
-$fullNamePost = isset($_POST['fullName']) ? stripslashes($_POST['fullName']) : null;
+$userPost = isset($_POST['user']) ? secure($_POST['user']) : null;
+$passPost = isset($_POST['pass']) ? secure($_POST['pass']) : null;
+$adminPassPost = isset($_POST['adminPass']) ? secure($_POST['adminPass']) : null;
+$fullNamePost = isset($_POST['fullName']) ? secure($_POST['fullName']) : null;
 $hash = (empty($_POST['user']) or empty($_POST['pass'])) ? null : hash('sha512', $passPost . $userPost);
 $userEdit = false;
 $fullNameEdit = false;

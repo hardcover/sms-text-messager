@@ -6,15 +6,14 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <info@hardcoverwebdesign.com>
+ * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-7 database A
+ * @version   GIT: 2012-10-15 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
-session_start();
 require 'z/includes/authorization.php';
 //
 // Programs
@@ -34,8 +33,8 @@ if (isset($_POST['groupName']) and ($_POST['groupName'] == null or $_POST['group
 //
 // Prepare post data
 //
-$adminPassPost = isset($_POST['adminPass']) ? stripslashes($_POST['adminPass']) : null;
-$groupName = isset($_POST['groupName']) ? stripslashes($_POST['groupName']) : null;
+$adminPassPost = isset($_POST['adminPass']) ? secure($_POST['adminPass']) : null;
+$groupName = isset($_POST['groupName']) ? secure($_POST['groupName']) : null;
 //
 // Test password authentication
 //

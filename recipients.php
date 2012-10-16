@@ -6,15 +6,14 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <info@hardcoverwebdesign.com>
+ * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-7 database A
+ * @version   GIT: 2012-10-15 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
-session_start();
 require 'z/includes/authorization.php';
 //
 // Programs
@@ -28,14 +27,14 @@ if (isset($_POST['adminPass']) and ($_POST['adminPass'] == null or $_POST['admin
 //
 // Prepare post data
 //
-$adminPassPost = isset($_POST['adminPass']) ? stripslashes($_POST['adminPass']) : null;
-$fullNamePost = isset($_POST['fullName']) ? stripslashes($_POST['fullName']) : null;
-$phonePost = isset($_POST['phone']) ? stripslashes($_POST['phone']) : null;
+$adminPassPost = isset($_POST['adminPass']) ? secure($_POST['adminPass']) : null;
+$fullNamePost = isset($_POST['fullName']) ? secure($_POST['fullName']) : null;
+$phonePost = isset($_POST['phone']) ? secure($_POST['phone']) : null;
 $phonePost = preg_replace("/\D/", "", $phonePost);
 $phonePost = $phonePost == '' ? null : $phonePost;
 $idCarrier = isset($_POST['idCarrier']) ? $_POST['idCarrier'] : null;
 $idCarrier = $idCarrier == '' ? null : $idCarrier;
-$emailPost = isset($_POST['email']) ? stripslashes($_POST['email']) : null;
+$emailPost = isset($_POST['email']) ? secure($_POST['email']) : null;
 $emailPost = $emailPost == '' ? null : $emailPost;
 $emailPost = ($phonePost == null and $idCarrier == null) ? $emailPost : null;
 $group = isset($_POST['group']) ? $_POST['group'] : null;

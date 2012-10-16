@@ -6,22 +6,24 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <info@hardcoverwebdesign.com>
+ * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-7 database A
+ * @version   GIT: 2012-10-15 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
 session_start();
-if (isset($_SESSION['auth'])) {
+if (isset($_SESSION['auth']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or isset($_SERVER['HTTP_VIA']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
     include 'logout.php';
 }
 //
 // Programs
 //
 require 'z/includes/functions.inc';
+require 'z/includes/INPUTS.php';
+$uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
 $message = false;
 require 'z/includes/db.php';
 $dbh = new PDO($db);
@@ -40,29 +42,50 @@ if ($row['count(*)'] < 1) {
 }
 $dbh = null;
 if (isset($_POST['user'], $_POST['pass'])) {
-    $hash = hash('sha512', $_POST['pass'] . $_POST['user']);
-    $dbh = new PDO($db);
-    $stmt = $dbh->prepare('SELECT idUser, user, pass, fullName FROM usersRecipients WHERE user=?');
+    $userPost = secure($_POST['user']);
+    //
+    // Allow five failed log ins per hour
+    //
+    date_default_timezone_set('America/Los_Angeles');
+    $now = time();
+    $lastHour = $now - (60 * 60);
+    $legibleTime = date("l, F j, Y, H:i:s", $now);
+    $dbh = new PDO($dbl);
+    $stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "login" ("idUser" INTEGER PRIMARY KEY, "user", "legibleTime", ipAddress, "time" INTEGER)');
+    $stmt = $dbh->prepare('INSERT INTO login (user, legibleTime, ipAddress, time) VALUES (?, ?, ?, ?)');
+    $stmt->execute(array($userPost, $legibleTime, $_SERVER['REMOTE_ADDR'], $now));
+    $stmt = $dbh->prepare('SELECT count(*) FROM login WHERE user=? AND time > ?');
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
-    $stmt->execute(array($_POST['user']));
+    $stmt->execute(array($userPost, $lastHour));
+    $row = $stmt->fetch();
+    if ($row['count(*)'] > 5) {
+        $dbh = null;
+        include 'logout.php';
+    }
+    $dbh = null;
+    //
+    // Authenticate
+    //
+    $hash = hash('sha512', secure($_POST['pass']) . $userPost);
+    $dbh = new PDO($db);
+    $stmt = $dbh->prepare('SELECT idUser, user, pass, fullName FROM usersRecipients WHERE user=? LIMIT 1');
+    $stmt->setFetchMode(PDO::FETCH_ASSOC);
+    $stmt->execute(array($userPost));
     $row = $stmt->fetch();
     $dbh = null;
-    if ($hash == $row['pass']) {
-        $_SESSION['auth'] = $row['idUser'] . $row['user'] . $_SERVER['REMOTE_ADDR'];
+    if ($hash === $row['pass']) {
+        $dbh = new PDO($dbl);
+        $stmt = $dbh->prepare('UPDATE login SET time=? WHERE user=?');
+        $stmt->execute(array(null, $userPost));
+        $dbh = null;
+        $_SESSION['auth'] = $row['idUser'] . $row['user'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'];
         $_SESSION['userIdS'] = $row['idUser'];
         $_SESSION['userS'] = $row['user'];
-        $host = $_SERVER["HTTP_HOST"];
-        include 'z/includes/logNotice.php';
-        $path = rtrim(dirname($_SERVER['PHP_SELF']), "/\\");
-        header("Location: http://$host$path/message.php");
+        header('Location: ' . $uri . 'message.php');
     } else {
         $message = 'Login credentials are incorrect.';
     }
 }
-$host = $_SERVER["HTTP_HOST"]; // Host and path are used by all header functions
-$path = rtrim(dirname($_SERVER['PHP_SELF']), "/\\");
-require 'z/includes/INPUTS.php';
-$uri = $uriScheme . '://' . $host . $path . '/';
 //
 // HTML
 //
