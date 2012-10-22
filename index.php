@@ -80,7 +80,7 @@ if (isset($_POST['user'], $_POST['pass'])) {
         $stmt = $dbh->prepare('UPDATE login SET time=? WHERE user=?');
         $stmt->execute(array(null, $userPost));
         $dbh = null;
-        $_SESSION['auth'] = $row['idUser'] . $row['user'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT'];
+        $_SESSION['auth'] = hash('sha256', $row['idUser'] . $row['user'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
         $_SESSION['userIdS'] = $row['idUser'];
         $_SESSION['userS'] = $row['user'];
         header('Location: ' . $uri . 'message.php');
