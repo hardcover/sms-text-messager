@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-15 database A
+ * @version   GIT: 2012-11-16 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -39,17 +39,17 @@ if (isset($_POST['send'])) {
         $dbh = new PDO($db);
         $stmt = $dbh->prepare('SELECT fullName FROM usersRecipients WHERE idUser=?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $stmt->execute(array($_SESSION['userIdS']));
+        $stmt->execute(array($_SESSION['userId']));
         $row = $stmt->fetch();
         isset($row['fullName']) ? extract($row) : $fullName = null;
         $stmt = $dbh->prepare('SELECT DISTINCT address FROM send WHERE idUserInSend=?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
-        $stmt->execute(array($_SESSION['userIdS']));
+        $stmt->execute(array($_SESSION['userId']));
         $row = $stmt->fetch();
         isset($row['address']) ? extract($row) : $address = null;
-        $from = ($fullName != null and $address != null) ? 'From: ' . $fullName . ' <' . $address . ">\r\n" : 'From: incompleteRecord' . $domain . "\r\n";
+        $from = ($fullName != null and $address != null) ? 'From: ' . $fullName . ' <' . plain($address) . ">\r\n" : 'From: IncompleteRecipientRecord@' . $domain . "\r\n";
         //
-        // Set the appropriate sql statement
+        // Assemble the appropriate sql statement
         //
         if ($_POST['group']['0'] == 'all') {
             $sql = 'SELECT DISTINCT address FROM send';
@@ -77,7 +77,7 @@ if (isset($_POST['send'])) {
         $stmt->execute($_POST['group']);
         foreach ($stmt as $row) {
             extract($row);
-            mail($address, "\r\n", $_POST['message'], $from);
+            mail(plain($address), "\r\n", $_POST['message'], $from);
         }
         $dbh = null;
         mail($emailTo, "\r\n", $_POST['message'], $from);
@@ -90,7 +90,7 @@ if (isset($_POST['send'])) {
 //
 require 'z/includes/header1.inc';
 echo '  <title>Send message</title>' . "\n";
-echo '  <script type="text/javascript" src="z/counter.js"></script>' . "\n";;
+echo '  <script type="text/javascript" src="z/counter.js"></script>' . "\n";
 require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>

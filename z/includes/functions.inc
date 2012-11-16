@@ -10,12 +10,12 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-15 database A
+ * @version   GIT: 2012-11-16 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
 /**
- * Function to make text input strings secure
+ * Function to secure text input strings and remove magic quote nonsense
  *
  * @param string $str The string
  *
@@ -50,7 +50,7 @@ function echoIfMessage($str)
     }
 }
 /**
- * Function to echo input values, when they exist
+ * Function to echo the input field value, when it exists
  *
  * @param string $str The value
  *
@@ -60,6 +60,36 @@ function echoIfValue($str)
 {
     if ($str == true) {
         echo ' value="' . html($str) . '"';
+    }
+}
+/**
+ * Function to obfuscate a string value for human and simple machine readers
+ *
+ * @param string $str The original string value
+ *
+ * @return An encoded muddle
+ */
+function muddle($str)
+{
+    if ($str == null or $str == '') {
+        return null;
+    } else {
+        return str_rot13(base64_encode($str));
+    }
+}
+/**
+ * Function to make plain a string value obfuscated with muddle
+ *
+ * @param string $str The encoded muddle
+ *
+ * @return The original string value before it was muddled
+ */
+function plain($str)
+{
+    if ($str == null or $str == '') {
+        return null;
+    } else {
+        return base64_decode(str_rot13($str));
     }
 }
 ?>

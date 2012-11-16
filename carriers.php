@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-15 database A
+ * @version   GIT: 2012-11-16 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -35,14 +35,13 @@ $emailSMSEdit = false;
 //
 // Test password authentication
 //
-$hashAdmin = hash('sha512', $adminPassPost . $_SESSION['userS']);
 $dbh = new PDO($db);
 $stmt = $dbh->prepare('SELECT pass FROM usersRecipients WHERE user=?');
 $stmt->setFetchMode(PDO::FETCH_ASSOC);
-$stmt->execute(array($_SESSION['userS']));
+$stmt->execute(array($_SESSION['username']));
 $row = $stmt->fetch();
 $dbh = null;
-if ($hashAdmin == $row['pass']) {
+if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
     //
     // Buttons, insert, update, delete
     //
@@ -122,6 +121,7 @@ if (isset($_POST['edit'])) {
 //
 require 'z/includes/header1.inc';
 echo '  <title>Carrier maintenance</title>' . "\n";
+echo '  <script type="text/javascript" src="z/scroll.js"></script>' . "\n";
 require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>

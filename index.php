@@ -10,15 +10,16 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-15 database A
+ * @version   GIT: 2012-11-16 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
 session_start();
+session_regenerate_id(true);
 require 'z/includes/INPUTS.php';
 $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
 if (isset($_SESSION['auth']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
-    require 'z/includes/INPUTS.php';
+    include 'z/includes/INPUTS.php';
     $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
     header('Location: ' . $uri . 'logout.php');
 }
@@ -40,7 +41,7 @@ $stmt->setFetchMode(PDO::FETCH_ASSOC);
 $row = $stmt->fetch();
 if ($row['count(*)'] < 1) {
     $stmt = $dbh->prepare('INSERT INTO usersRecipients (user, pass, fullName, userStatus) VALUES (?, ?, ?, ?)');
-    $stmt->execute(array('setup', 'eb0f5d35ef21aa7f1b3a67e31007ec0b34b8902e3f81e91dae641bc781a901d6478c0af977dde1ecf5270d9c88e26e735084c757242169d0176092dde4c7c90a', 'Setup user (temporary)', 1));
+    $stmt->execute(array('setup', '$2a$09$BC3AK7VYztjJ1TIClKIO4OhcO48IME0qDLIN7EZ3qPneUmENQfdW2', 'Setup user (temporary)', 1));
 }
 $dbh = null;
 if (isset($_POST['user'], $_POST['pass'])) {
@@ -68,21 +69,22 @@ if (isset($_POST['user'], $_POST['pass'])) {
     //
     // Authenticate
     //
-    $hash = hash('sha512', secure($_POST['pass']) . $userPost);
     $dbh = new PDO($db);
     $stmt = $dbh->prepare('SELECT idUser, user, pass, fullName FROM usersRecipients WHERE user=? LIMIT 1');
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $stmt->execute(array($userPost));
     $row = $stmt->fetch();
     $dbh = null;
-    if (strval($hash) === strval($row['pass'])) {
+    if (strval(crypt(secure($_POST['pass']), $row['pass'])) === strval($row['pass'])) {
         $dbh = new PDO($dbl);
         $stmt = $dbh->prepare('UPDATE login SET time=? WHERE user=?');
         $stmt->execute(array(null, $userPost));
         $dbh = null;
-        $_SESSION['auth'] = hash('sha256', $row['idUser'] . $row['user'] . $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']);
-        $_SESSION['userIdS'] = $row['idUser'];
-        $_SESSION['userS'] = $row['user'];
+        $_SESSION['auth'] = hash('sha256', $_SERVER['REMOTE_ADDR'] . $_SERVER['HTTP_USER_AGENT']) . hash('sha512', $row['user'] . $row['idUser']);
+        $_SESSION['userID'] = hash('sha512', $row['user'] . $row['idUser']);
+        $_SESSION['userId'] = $row['idUser'];
+        $_SESSION['username'] = $row['user'];
+        include 'z/includes/logNotice.php';
         header('Location: ' . $uri . 'message.php');
     } else {
         $message = 'Login credentials are incorrect.';

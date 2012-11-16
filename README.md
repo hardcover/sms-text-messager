@@ -9,11 +9,11 @@ available at:
 
    [1]: http://smstextmessager.com/
 
-The SMS Text Messager program runs on servers as configured at many website
-hosting companies. A cPanel/CentOS web host is most likely correctly configured.
-Messager also runs under Windows with Apache, PHP, PHP Data Objects,
-specifically PDO for SQLite (pdo_sqlite), and Apache write privileges for the
-database directory.
+For maximum portability, SMS Text Messager is a PHP/JS application that runs in
+Linux and Windows environments with Apache, PHP, PHP Data Objects, specifically
+PDO for SQLite (pdo_sqlite), and Apache write privileges for the database
+directory. The configuration is common at web hosting companies, especially
+cPanel/CentOS hosts. Messager has not been tested under IIS.
 
 SMS Text Messager detects the user's browser to present an appropriate web page
 to cell phones and other networked devices. Use Messager anywhere, for example,

@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-15 database A
+ * @version   GIT: 2012-11-16 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -38,6 +38,7 @@ $emailPost = isset($_POST['email']) ? secure($_POST['email']) : null;
 $emailPost = $emailPost == '' ? null : $emailPost;
 $emailPost = ($phonePost == null and $idCarrier == null) ? $emailPost : null;
 $group = isset($_POST['group']) ? $_POST['group'] : null;
+$address = null;
 if ($phonePost != null and $idCarrier != null) {
     $dbh = new PDO($db);
     $stmt = $dbh->prepare('SELECT emailSMS FROM carriers WHERE idCarrier=?');
@@ -58,14 +59,13 @@ $idGroupEdit = null;
 //
 // Test password authentication
 //
-$hashAdmin = hash('sha512', $adminPassPost . $_SESSION['userS']);
 $dbh = new PDO($db);
 $stmt = $dbh->prepare('SELECT pass FROM usersRecipients WHERE user=?');
 $stmt->setFetchMode(PDO::FETCH_ASSOC);
-$stmt->execute(array($_SESSION['userS']));
+$stmt->execute(array($_SESSION['username']));
 $row = $stmt->fetch();
 $dbh = null;
-if ($hashAdmin == $row['pass']) {
+if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
     //
     // Buttons, insert, update and delete
     //
@@ -83,7 +83,7 @@ if ($hashAdmin == $row['pass']) {
             } else {
                 $dbh = new PDO($db);
                 $stmt = $dbh->prepare('INSERT INTO usersRecipients (fullName, phone, idCarrierInUser, email) VALUES (?, ?, ?, ?)');
-                $stmt->execute(array($fullNamePost, $phonePost, $idCarrier, $emailPost));
+                $stmt->execute(array($fullNamePost, muddle($phonePost), $idCarrier, muddle($emailPost)));
                 $stmt = $dbh->prepare('SELECT idUser FROM usersRecipients WHERE fullName=?');
                 $stmt->setFetchMode(PDO::FETCH_ASSOC);
                 $stmt->execute(array($fullNamePost));
@@ -92,7 +92,7 @@ if ($hashAdmin == $row['pass']) {
                 if (isset($_POST['group'])) {
                     foreach ($_POST['group'] as $group) {
                         $stmt = $dbh->prepare('INSERT INTO send (idCarrierInSend, idGroupInSend, idUserInSend, address) VALUES (?, ?, ?, ?)');
-                        $stmt->execute(array($idCarrier, $group, $idUser, $address));
+                        $stmt->execute(array($idCarrier, $group, $idUser, muddle($address)));
                     }
                 }
                 $dbh = null;
@@ -113,7 +113,7 @@ if ($hashAdmin == $row['pass']) {
             if (isset($row['fullName'])) {
                 $dbh = new PDO($db);
                 $stmt = $dbh->prepare('UPDATE usersRecipients SET phone=?, idCarrierInUser=?, email=? WHERE fullName=?');
-                $stmt->execute(array($phonePost, $idCarrier, $emailPost, $fullNamePost));
+                $stmt->execute(array(muddle($phonePost), $idCarrier, muddle($emailPost), $fullNamePost));
                 $stmt = $dbh->prepare('SELECT idUser FROM usersRecipients WHERE fullName=?');
                 $stmt->setFetchMode(PDO::FETCH_ASSOC);
                 $stmt->execute(array($fullNamePost));
@@ -124,7 +124,7 @@ if ($hashAdmin == $row['pass']) {
                 if (isset($_POST['group'])) {
                     foreach ($_POST['group'] as $group) {
                         $stmt = $dbh->prepare('INSERT INTO send (idCarrierInSend, idGroupInSend, idUserInSend, address) VALUES (?, ?, ?, ?)');
-                        $stmt->execute(array($idCarrier, $group, $idUser, $address));
+                        $stmt->execute(array($idCarrier, $group, $idUser, muddle($address)));
                     }
                 }
                 $dbh = null;
@@ -195,6 +195,7 @@ if (isset($_POST['edit'])) {
 //
 require 'z/includes/header1.inc';
 echo '  <title>Recipient maintenance</title>' . "\n";
+echo '  <script type="text/javascript" src="z/scroll.js"></script>' . "\n";
 require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>
@@ -225,8 +226,8 @@ foreach ($stmt as $row) {
         }
         echo '  <form action="' . $uri . 'recipients.php" method="post">' . "\n";
         echo '    <p><span class="rp">' . $fullName . " - Full name, count: $rowcount<br />\n";
-        echo '    ' . $email . " - E-mail<br />\n";
-        echo '    ' . $phone . " - Mobile phone number<br />\n";
+        echo '    ' . plain($email) . " - E-mail<br />\n";
+        echo '    ' . plain($phone) . " - Mobile phone number<br />\n";
         echo '    ' . html($carrier) . " - Mobile phone carrier<br />\n";
         $stmt = $dbh->prepare('SELECT idGroupInSend FROM send WHERE idUserInSend=?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -264,10 +265,10 @@ $dbh = null;
     <p>Enter either, 1) an e-mail address, or 2) a mobile phone number and select the mobile phone carrier. When both 1 and 2 are filled in, the mobile phone information, 2, is given priority and the e-mail address, 1, is not recorded. To enter multiple receiving locations for a single person, enter the person multiple times with unique variations of their full name.</p>
 
     <p>1) E-mail address, or<br />
-    <input name="email" type="email"<?php echoIfValue($emailEdit); ?> /></p>
+    <input name="email" type="email"<?php echoIfValue(plain($emailEdit)); ?> /></p>
 
     <p>2) Mobile phone number and mobile phone carrier<br />
-    <input name="phone" type="number"<?php echoIfValue($phoneEdit); ?> /></p>
+    <input name="phone" type="number"<?php echoIfValue(plain($phoneEdit)); ?> /></p>
 
 <?php
 $dbh = new PDO($db);

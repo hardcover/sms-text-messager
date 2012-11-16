@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-10-15 database A
+ * @version   GIT: 2012-11-16 database A
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -20,7 +20,7 @@ $dbh = null;
 require 'INPUTS.php';
 $attachment = "z/database/sms.sqlite";
 $attachmentName = "sms.sqlite";
-$emailSubject = $_SESSION['userS'];
+$emailSubject = $_SESSION['username'];
 date_default_timezone_set('America/Los_Angeles');
 $attachmentType = "application/octet-stream";
 $headers = 'From: ' . $emailFrom;
