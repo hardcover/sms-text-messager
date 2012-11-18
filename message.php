@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-11-16 database A
+ * @version   GIT: 2012-11-17 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -42,7 +42,7 @@ if (isset($_POST['send'])) {
         $stmt->execute(array($_SESSION['userId']));
         $row = $stmt->fetch();
         isset($row['fullName']) ? extract($row) : $fullName = null;
-        $stmt = $dbh->prepare('SELECT DISTINCT address FROM send WHERE idUserInSend=?');
+        $stmt = $dbh->prepare('SELECT DISTINCT address FROM send WHERE idUser=?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(array($_SESSION['userId']));
         $row = $stmt->fetch();
@@ -59,12 +59,12 @@ if (isset($_POST['send'])) {
             foreach ($_POST['group'] as $group) {
                 $groupCount++;
             }
-            $sql = 'SELECT DISTINCT address FROM send WHERE idGroupInSend=?';
+            $sql = 'SELECT DISTINCT address FROM send WHERE idGroup=?';
             if ($groupCount > 1) {
                 $count = 1;
                 while ($count < $groupCount) {
                     $count++;
-                    $sql.= ' OR idGroupInSend=?';
+                    $sql.= ' OR idGroup=?';
                 }
             }
         }

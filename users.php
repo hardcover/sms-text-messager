@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-11-16 database A
+ * @version   GIT: 2012-11-17 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -121,7 +121,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                     extract($row);
                     $stmt = $dbh->prepare('DELETE FROM usersRecipients WHERE idUser=?');
                     $stmt->execute(array($idUser));
-                    $stmt = $dbh->prepare('DELETE FROM send WHERE idUserInSend=?');
+                    $stmt = $dbh->prepare('DELETE FROM send WHERE idUser=?');
                     $stmt->execute(array($idUser));
                     $stmt = $dbh->query('VACUUM');
                     $dbh = null;

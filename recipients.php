@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-11-16 database A
+ * @version   GIT: 2012-11-17 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -82,7 +82,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                 exit;
             } else {
                 $dbh = new PDO($db);
-                $stmt = $dbh->prepare('INSERT INTO usersRecipients (fullName, phone, idCarrierInUser, email) VALUES (?, ?, ?, ?)');
+                $stmt = $dbh->prepare('INSERT INTO usersRecipients (fullName, phone, idCarrier, email) VALUES (?, ?, ?, ?)');
                 $stmt->execute(array($fullNamePost, muddle($phonePost), $idCarrier, muddle($emailPost)));
                 $stmt = $dbh->prepare('SELECT idUser FROM usersRecipients WHERE fullName=?');
                 $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -91,7 +91,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                 extract($row);
                 if (isset($_POST['group'])) {
                     foreach ($_POST['group'] as $group) {
-                        $stmt = $dbh->prepare('INSERT INTO send (idCarrierInSend, idGroupInSend, idUserInSend, address) VALUES (?, ?, ?, ?)');
+                        $stmt = $dbh->prepare('INSERT INTO send (idCarrier, idGroup, idUser, address) VALUES (?, ?, ?, ?)');
                         $stmt->execute(array($idCarrier, $group, $idUser, muddle($address)));
                     }
                 }
@@ -112,18 +112,18 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
             $dbh = null;
             if (isset($row['fullName'])) {
                 $dbh = new PDO($db);
-                $stmt = $dbh->prepare('UPDATE usersRecipients SET phone=?, idCarrierInUser=?, email=? WHERE fullName=?');
+                $stmt = $dbh->prepare('UPDATE usersRecipients SET phone=?, idCarrier=?, email=? WHERE fullName=?');
                 $stmt->execute(array(muddle($phonePost), $idCarrier, muddle($emailPost), $fullNamePost));
                 $stmt = $dbh->prepare('SELECT idUser FROM usersRecipients WHERE fullName=?');
                 $stmt->setFetchMode(PDO::FETCH_ASSOC);
                 $stmt->execute(array($fullNamePost));
                 $row = $stmt->fetch();
                 extract($row);
-                $stmt = $dbh->prepare('DELETE FROM send WHERE idUserInSend=?');
+                $stmt = $dbh->prepare('DELETE FROM send WHERE idUser=?');
                 $stmt->execute(array($idUser));
                 if (isset($_POST['group'])) {
                     foreach ($_POST['group'] as $group) {
-                        $stmt = $dbh->prepare('INSERT INTO send (idCarrierInSend, idGroupInSend, idUserInSend, address) VALUES (?, ?, ?, ?)');
+                        $stmt = $dbh->prepare('INSERT INTO send (idCarrier, idGroup, idUser, address) VALUES (?, ?, ?, ?)');
                         $stmt->execute(array($idCarrier, $group, $idUser, muddle($address)));
                     }
                 }
@@ -153,7 +153,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                 extract($row);
                 $stmt = $dbh->prepare('DELETE FROM usersRecipients WHERE idUser=?');
                 $stmt->execute(array($idUser));
-                $stmt = $dbh->prepare('DELETE FROM send WHERE idUserInSend=?');
+                $stmt = $dbh->prepare('DELETE FROM send WHERE idUser=?');
                 $stmt->execute(array($idUser));
                 $stmt = $dbh->query('VACUUM');
                 $dbh = null;
@@ -173,20 +173,20 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
 //
 if (isset($_POST['edit'])) {
     $dbh = new PDO($db);
-    $stmt = $dbh->prepare('SELECT idUser, phone, idCarrierInUser, email FROM usersRecipients WHERE fullName=?');
+    $stmt = $dbh->prepare('SELECT idUser, phone, idCarrier, email FROM usersRecipients WHERE fullName=?');
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $stmt->execute(array($fullNamePost));
     $row = $stmt->fetch();
     extract($row);
     $fullNameEdit = $fullNamePost;
     $phoneEdit = $phone;
-    $idCarrierEdit = $idCarrierInUser;
+    $idCarrierEdit = $idCarrier;
     $emailEdit = $email;
-    $stmt = $dbh->prepare('SELECT idGroupInSend FROM send WHERE idUserInSend=?');
+    $stmt = $dbh->prepare('SELECT idGroup FROM send WHERE idUser=?');
     $stmt->setFetchMode(PDO::FETCH_ASSOC);
     $stmt->execute(array($idUser));
     foreach ($stmt as $row) {
-        $idGroupEdit[].= $row['idGroupInSend'];
+        $idGroupEdit[].= $row['idGroup'];
     }
     $dbh = null;
 }
@@ -208,17 +208,17 @@ require 'z/includes/body.inc';
 <?php
 $rowcount = null;
 $dbh = new PDO($db);
-$stmt = $dbh->prepare('SELECT idUser, user, fullName, phone, idCarrierInUser, email FROM usersRecipients ORDER BY fullName');
+$stmt = $dbh->prepare('SELECT idUser, user, fullName, phone, idCarrier, email FROM usersRecipients ORDER BY fullName');
 $stmt->setFetchMode(PDO::FETCH_ASSOC);
 $stmt->execute();
 foreach ($stmt as $row) {
     extract($row);
     if ($user != 'admin') {
         $rowcount++;
-        if ($idCarrierInUser != null) {
+        if ($idCarrier != null) {
             $stmt = $dbh->prepare('SELECT carrier FROM carriers WHERE idCarrier=?');
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
-            $stmt->execute(array($idCarrierInUser));
+            $stmt->execute(array($idCarrier));
             $row = $stmt->fetch();
             extract($row);
         } else {
@@ -229,13 +229,13 @@ foreach ($stmt as $row) {
         echo '    ' . plain($email) . " - E-mail<br />\n";
         echo '    ' . plain($phone) . " - Mobile phone number<br />\n";
         echo '    ' . html($carrier) . " - Mobile phone carrier<br />\n";
-        $stmt = $dbh->prepare('SELECT idGroupInSend FROM send WHERE idUserInSend=?');
+        $stmt = $dbh->prepare('SELECT idGroup FROM send WHERE idUser=?');
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute(array($idUser));
         foreach ($stmt as $row) {
             $stmt = $dbh->prepare('SELECT groupName FROM groups WHERE idGroup=?');
             $stmt->setFetchMode(PDO::FETCH_ASSOC);
-            $stmt->execute(array($row['idGroupInSend']));
+            $stmt->execute(array($row['idGroup']));
             $row = $stmt->fetch();
             if (isset($row['groupName'])) {
                 echo '    ' . $row['groupName'] . " - Group<br />\n";

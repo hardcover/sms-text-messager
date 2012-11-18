@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-11-16 database A
+ * @version   GIT: 2012-11-17 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -33,8 +33,8 @@ $dbh = new PDO($db);
 $dbh->beginTransaction();
 $stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "carriers" ("idCarrier" INTEGER PRIMARY KEY, "carrier", "emailSMS")');
 $stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "groups" ("idGroup" INTEGER PRIMARY KEY, "groupName" NOT NULL)');
-$stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "send" ("idSend" INTEGER PRIMARY KEY, "idCarrierInSend" INTEGER, "idGroupInSend" INTEGER, "idUserInSend" INTEGER, "address")');
-$stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "usersRecipients" ("idUser" INTEGER PRIMARY KEY, "user", "pass", "fullName", "userStatus" INTEGER, "phone", "idCarrierInUser" INTEGER, "email")');
+$stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "send" ("idSend" INTEGER PRIMARY KEY, "idCarrier" INTEGER, "idGroup" INTEGER, "idUser" INTEGER, "address")');
+$stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "usersRecipients" ("idUser" INTEGER PRIMARY KEY, "user", "pass", "fullName", "userStatus" INTEGER, "phone", "idCarrier" INTEGER, "email")');
 $dbh->commit();
 $stmt = $dbh->query('SELECT count(*) FROM usersRecipients');
 $stmt->setFetchMode(PDO::FETCH_ASSOC);
