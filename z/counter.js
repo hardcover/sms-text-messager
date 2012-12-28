@@ -16,5 +16,6 @@ function addCounter(inputID, counterID, maxLength) {
 
 window.onload = function () {
     'use strict';
+    document.getElementById('message').focus();
     addCounter('message', 'counterMessage', 600);
 };

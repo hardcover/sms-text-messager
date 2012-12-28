@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-11-17 database B
+ * @version   GIT: 2012-12-27 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -93,7 +93,7 @@ $groupNameEdit = isset($_POST['edit']) ? $groupName : false;
 //
 require 'z/includes/header1.inc';
 echo '  <title>Group maintenance</title>' . "\n";
-echo '  <script type="text/javascript" src="z/scroll.js"></script>' . "\n";
+echo '  <script type="text/javascript" src="z/focus.js"></script>' . "\n";
 require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>
@@ -125,7 +125,7 @@ $dbh = null;
 
   <form action="<?php echo $uri; ?>groups.php" method="post">
     <p>Password<br />
-    <input name="adminPass" type="password" autofocus="autofocus" required="required" /></p>
+    <input id="adminPass" name="adminPass" type="password" required="required" /></p>
 
     <h1>Add or delete groups</h1>
 

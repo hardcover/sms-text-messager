@@ -10,7 +10,7 @@
  * @copyright 2012 Hardcover Web Design LLC
  * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
  *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-11-17 database B
+ * @version   GIT: 2012-12-27 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
@@ -104,7 +104,7 @@ require 'z/includes/header2.inc';
   <form action="<?php echo $uri; ?>" method="post" id="login">
 
     <p>User<br />
-    <input id="user" name="user" type="text" maxlength="254" autofocus="autofocus" /></p>
+    <input id="user" name="user" type="text" maxlength="254" autofocus /></p>
 
     <p>Password<br />
     <input name="pass" type="password" maxlength="254" /></p>
