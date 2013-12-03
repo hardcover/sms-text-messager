@@ -6,33 +6,33 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
- * @copyright 2012 Hardcover Web Design LLC
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-12-27 database B
+ * @author    Hardcover LLC <useTheContactForm@hardcoverwebdesign.com>
+ * @copyright 2013 Hardcover LLC
+ * @license   http://hardcoverwebdesign.com/license  MIT License
+ *.@license   http://hardcoverwebdesign.com/gpl-2.0  GNU General Public License, Version 2
+ * @version   GIT: 2013-12-1 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
-require 'z/includes/authorization.php';
+require 'z/system/configuration.php';
+require $includesPath . '/authorization.php';
+require $includesPath . '/common.php';
 //
-// Programs
+// Variables
 //
-require 'z/includes/functions.inc';
-$message = false;
-require 'z/includes/db.php';
-$_POST['message'] = isset($_POST['message']) ? stripslashes($_POST['message']) : null;
-date_default_timezone_set('America/Los_Angeles');
+$message = null;
+$messagePost = securePost('message');
+//
+// Program
+//
 if (isset($_POST['send'])) {
     if (!isset($_POST['group'])) {
         $message = 'No group was selected.';
-        $_POST['message'] = isset($_POST['message']) ? $_POST['message'] = stripslashes($_POST['message']) : $_POST['message'] = null;
     }
     if ($_POST['message'] == null) {
         $message = 'No message was entered.';
     }
     if (isset($_POST['group']) and $_POST['message'] != null) {
-        $_POST['message'] = stripslashes($_POST['message']);
         //
         // Okay to send message, set the value of From:
         //
@@ -47,7 +47,11 @@ if (isset($_POST['send'])) {
         $stmt->execute(array($_SESSION['userId']));
         $row = $stmt->fetch();
         isset($row['address']) ? extract($row) : $address = null;
-        $from = ($fullName != null and $address != null) ? 'From: ' . $fullName . ' <' . plain($address) . ">\r\n" : 'From: IncompleteRecipientRecord@' . $domain . "\r\n";
+        if ($fullName != null and $address != null) {
+            $from = $fullName . ' <' . plain($address) . '>';
+        } else {
+            $from = 'IncompleteRecipientRecord@' . $domain;
+        }
         //
         // Assemble the appropriate sql statement
         //
@@ -71,18 +75,17 @@ if (isset($_POST['send'])) {
         //
         // Send message
         //
-        include 'z/includes/INPUTS.php';
         $stmt = $dbh->prepare($sql);
         $stmt->setFetchMode(PDO::FETCH_ASSOC);
         $stmt->execute($_POST['group']);
         foreach ($stmt as $row) {
             extract($row);
-            mail(plain($address), "\r\n", $_POST['message'], $from);
+            mail(plain($address) . "\r\n", "\r\n", $messagePost . "\r\n", 'From: ' . $from . "\r\n");
         }
         $dbh = null;
-        mail($emailTo, "\r\n", $_POST['message'], $from);
+        mail($emailTo . "\r\n", "\r\n", $messagePost . "\r\n", 'From: ' . $from . "\r\n", '-f' . $from . "\r\n");
         $message = 'The message was sent.';
-        $_POST['message'] = null;
+        $messagePost = null;
     }
 }
 //
@@ -95,7 +98,7 @@ require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>
 
-  <h4><a class="s" href="message.php">&nbsp;Message&nbsp;</a><a class="m" href="groups.php">&nbsp;Groups&nbsp;</a><a class="m" href="users.php">&nbsp;Users&nbsp;</a><a class="m" href="recipients.php">&nbsp;Recipients&nbsp;</a><a class="m" href="carriers.php">&nbsp;Carriers&nbsp;</a></h4>
+  <h4 class="m"><a class="s" href="message.php">&nbsp;Message&nbsp;</a><a class="m" href="groups.php">&nbsp;Groups&nbsp;</a><a class="m" href="users.php">&nbsp;Users&nbsp;</a><a class="m" href="recipients.php">&nbsp;Recipients&nbsp;</a><a class="m" href="carriers.php">&nbsp;Carriers&nbsp;</a></h4>
 <?php echoIfMessage($message); ?>
 
   <h1>Send a message</h1>
@@ -106,7 +109,7 @@ $dbh = new PDO($db);
 $stmt = $dbh->prepare('SELECT idGroup, groupName FROM groups ORDER BY groupName');
 $stmt->setFetchMode(PDO::FETCH_ASSOC);
 $stmt->execute();
-echo '    <p><input type="checkbox" name="group[]" value="all" /> All&nbsp;&nbsp;&nbsp;&nbsp;';
+echo '    <p><span class="b"><input type="checkbox" name="group[]" value="all" /> All</span>&nbsp;&nbsp;&nbsp;&nbsp;';
 foreach ($stmt as $row) {
     extract($row);
     echo '<span class="b"><input type="checkbox" name="group[]" value="' . $idGroup . '" /> ' . html($groupName) . '</span>&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -116,7 +119,7 @@ $dbh = null;
 ?>
 
     <p>600 character limit, 120 suggested: <span id="counterMessage"></span><br />
-    <textarea id="message" name="message" rows="15" cols="35" maxlength="601"><?php echo html($_POST['message']); ?></textarea></p>
+    <textarea id="message" name="message" rows="15" cols="35" maxlength="601"><?php echo html($messagePost); ?></textarea></p>
 
     <p><input type="submit" value="Send message" name="send" class="button" /></p>
   </form>

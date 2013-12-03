@@ -6,38 +6,28 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
- * @copyright 2012 Hardcover Web Design LLC
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-12-27 database B
+ * @author    Hardcover LLC <useTheContactForm@hardcoverwebdesign.com>
+ * @copyright 2013 Hardcover LLC
+ * @license   http://hardcoverwebdesign.com/license  MIT License
+ *.@license   http://hardcoverwebdesign.com/gpl-2.0  GNU General Public License, Version 2
+ * @version   GIT: 2013-12-1 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
-require 'z/includes/authorization.php';
+require 'z/system/configuration.php';
+require $includesPath . '/authorization.php';
+require $includesPath . '/common.php';
 //
-// Programs
+// Variables
 //
-require 'z/includes/functions.inc';
-$message = false;
-require 'z/includes/db.php';
-if (isset($_POST['adminPass']) and ($_POST['adminPass'] == null or $_POST['adminPass'] == '')) {
-    $message = 'Your password is required for all recipient maintenance.';
-}
-//
-// Prepare post data
-//
-$adminPassPost = isset($_POST['adminPass']) ? secure($_POST['adminPass']) : null;
-$fullNamePost = isset($_POST['fullName']) ? secure($_POST['fullName']) : null;
-$phonePost = isset($_POST['phone']) ? secure($_POST['phone']) : null;
+$adminPassPost = inlinePost('adminPass');
+$fullNamePost = inlinePost('fullName');
+$phonePost = inlinePost('phone');
 $phonePost = preg_replace("/\D/", "", $phonePost);
 $phonePost = $phonePost == '' ? null : $phonePost;
-$idCarrier = isset($_POST['idCarrier']) ? $_POST['idCarrier'] : null;
-$idCarrier = $idCarrier == '' ? null : $idCarrier;
-$emailPost = isset($_POST['email']) ? secure($_POST['email']) : null;
-$emailPost = $emailPost == '' ? null : $emailPost;
+$idCarrier = inlinePost('idCarrier');
+$emailPost = inlinePost('email');
 $emailPost = ($phonePost == null and $idCarrier == null) ? $emailPost : null;
-$group = isset($_POST['group']) ? $_POST['group'] : null;
 $address = null;
 if ($phonePost != null and $idCarrier != null) {
     $dbh = new PDO($db);
@@ -51,11 +41,15 @@ if ($phonePost != null and $idCarrier != null) {
 } elseif ($emailPost != null) {
     $address = $emailPost;
 }
-$fullNameEdit = false;
-$phoneEdit = false;
+$fullNameEdit = null;
+$phoneEdit = null;
 $idCarrierEdit = null;
-$emailEdit = false;
+$emailEdit = null;
 $idGroupEdit = null;
+$message = null;
+if (isset($_POST['adminPass']) and ($_POST['adminPass'] == null or $_POST['adminPass'] == '')) {
+    $message = 'Your password is required for all recipient maintenance.';
+}
 //
 // Test password authentication
 //
@@ -96,7 +90,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                     }
                 }
                 $dbh = null;
-                include 'z/includes/backUp.php';
+                mailAttachments($_SESSION['username'], $emailTo, $emailFrom, array($includesPath . '/databases/sms.sqlite', 'z/system/configuration.php'));
             }
         } else {
             $message = 'No full name was input.';
@@ -128,7 +122,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                     }
                 }
                 $dbh = null;
-                include 'z/includes/backUp.php';
+                mailAttachments($_SESSION['username'], $emailTo, $emailFrom, array($includesPath . '/databases/sms.sqlite', 'z/system/configuration.php'));
             } else {
                 $message = 'Full name did not match an existing entry.';
             }
@@ -157,7 +151,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                 $stmt->execute(array($idUser));
                 $stmt = $dbh->query('VACUUM');
                 $dbh = null;
-                include 'z/includes/backUp.php';
+                mailAttachments($_SESSION['username'], $emailTo, $emailFrom, array($includesPath . '/databases/sms.sqlite', 'z/system/configuration.php'));
             } else {
                 $message = 'Full name did not match an existing entry.';
             }
@@ -200,7 +194,7 @@ require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>
 
-  <h4><a class="m" href="message.php">&nbsp;Message&nbsp;</a><a class="m" href="groups.php">&nbsp;Groups&nbsp;</a><a class="m" href="users.php">&nbsp;Users&nbsp;</a><a class="s" href="recipients.php">&nbsp;Recipients&nbsp;</a><a class="m" href="carriers.php">&nbsp;Carriers&nbsp;</a></h4>
+  <h4 class="m"><a class="m" href="message.php">&nbsp;Message&nbsp;</a><a class="m" href="groups.php">&nbsp;Groups&nbsp;</a><a class="m" href="users.php">&nbsp;Users&nbsp;</a><a class="s" href="recipients.php">&nbsp;Recipients&nbsp;</a><a class="m" href="carriers.php">&nbsp;Carriers&nbsp;</a></h4>
 <?php echoIfMessage($message); ?>
 
   <h1><span class="r">Recipients</span></h1>

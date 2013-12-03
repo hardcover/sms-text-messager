@@ -6,29 +6,43 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
- * @copyright 2012 Hardcover Web Design LLC
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-12-27 database B
+ * @author    Hardcover LLC <useTheContactForm@hardcoverwebdesign.com>
+ * @copyright 2013 Hardcover LLC
+ * @license   http://hardcoverwebdesign.com/license  MIT License
+ *.@license   http://hardcoverwebdesign.com/gpl-2.0  GNU General Public License, Version 2
+ * @version   GIT: 2013-12-1 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
 session_start();
 session_regenerate_id(true);
-require 'z/includes/INPUTS.php';
+//
+// Check for existing configuration file, create one if not found
+//
+if (file_exists('z/system/configuration.php')) {
+    if (file_exists('z/system/configuration.inc')) {
+        unlink('z/system/configuration.inc');
+    }
+} else {
+    rename('z/system/configuration.inc', 'z/system/configuration.php');
+}
+require 'z/system/configuration.php';
 $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
 if (isset($_SESSION['auth']) or isset($_SERVER['HTTP_X_FORWARDED_FOR']) or isset($_SERVER['HTTP_X_FORWARDED']) or isset($_SERVER['HTTP_FORWARDED_FOR']) or in_array($_SERVER['REMOTE_PORT'], array(8080, 80, 6588, 8000, 3128, 553, 554))) {
-    include 'z/includes/INPUTS.php';
     $uri = $uriScheme . '://' . $_SERVER["HTTP_HOST"] . rtrim(dirname($_SERVER['PHP_SELF']), "/\\") . '/';
     header('Location: ' . $uri . 'logout.php');
 }
+require $includesPath . '/common.php';
+require $includesPath . '/password_compat/password.php';
+//
+// Variables
+//
+$message = null;
+$passPost = inlinePost('pass');
+$userPost = inlinePost('user');
 //
 // Programs
 //
-require 'z/includes/functions.inc';
-$message = false;
-require 'z/includes/db.php';
 $dbh = new PDO($db);
 $dbh->beginTransaction();
 $stmt = $dbh->query('CREATE TABLE IF NOT EXISTS "carriers" ("idCarrier" INTEGER PRIMARY KEY, "carrier", "emailSMS")');
@@ -41,7 +55,7 @@ $stmt->setFetchMode(PDO::FETCH_ASSOC);
 $row = $stmt->fetch();
 if ($row['count(*)'] < 1) {
     $stmt = $dbh->prepare('INSERT INTO usersRecipients (user, pass, fullName, userStatus) VALUES (?, ?, ?, ?)');
-    $stmt->execute(array('setup', '$2a$09$BC3AK7VYztjJ1TIClKIO4OhcO48IME0qDLIN7EZ3qPneUmENQfdW2', 'Setup user (temporary)', 1));
+    $stmt->execute(array('setup', password_hash('setup', PASSWORD_DEFAULT), 'Setup user (temporary)', 1));
 }
 $dbh = null;
 if (isset($_POST['user'], $_POST['pass'])) {
@@ -49,7 +63,6 @@ if (isset($_POST['user'], $_POST['pass'])) {
     //
     // Allow five failed log ins per hour
     //
-    date_default_timezone_set('America/Los_Angeles');
     $now = time();
     $lastHour = $now - (60 * 60);
     $legibleTime = date("l, F j, Y, H:i:s", $now);
@@ -75,7 +88,14 @@ if (isset($_POST['user'], $_POST['pass'])) {
     $stmt->execute(array($userPost));
     $row = $stmt->fetch();
     $dbh = null;
-    if (strval(crypt(secure($_POST['pass']), $row['pass'])) === strval($row['pass'])) {
+    if (password_verify($passPost, $row['pass'])) {
+        if (password_needs_rehash($row['pass'], PASSWORD_DEFAULT)) {
+            $newHash = password_hash($passPost, PASSWORD_DEFAULT);
+            $dbh = new PDO($db);
+            $stmt = $dbh->prepare('UPDATE usersRecipients SET pass=? WHERE idUser=?');
+            $stmt->execute(array($newHash, $row['idUser']));
+            $dbh = null;
+        }
         $dbh = new PDO($dbl);
         $stmt = $dbh->prepare('UPDATE login SET time=? WHERE user=?');
         $stmt->execute(array(null, $userPost));

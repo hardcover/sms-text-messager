@@ -6,50 +6,38 @@
  *
  * @category  Messaging
  * @package   SMS-Text-Messager
- * @author    Hardcover Web Design LLC <useTheContactForm@hardcoverwebdesign.com>
- * @copyright 2012 Hardcover Web Design LLC
- * @license   http://www.opensource.org/licenses/mit-license.html  MIT License
- *.@license   http://www.gnu.org/licenses/gpl-2.0.txt  GNU General Public License, Version 2
- * @version   GIT: 2012-12-27 database B
+ * @author    Hardcover LLC <useTheContactForm@hardcoverwebdesign.com>
+ * @copyright 2013 Hardcover LLC
+ * @license   http://hardcoverwebdesign.com/license  MIT License
+ *.@license   http://hardcoverwebdesign.com/gpl-2.0  GNU General Public License, Version 2
+ * @version   GIT: 2013-12-1 database B
  * @link      http://smstextmessager.com/
  * @link      http://hardcoverwebdesign.com/
  */
-require 'z/includes/authorization.php';
+require 'z/system/configuration.php';
+require $includesPath . '/authorization.php';
+require $includesPath . '/common.php';
+require $includesPath . '/password_compat/password.php';
 //
-// Programs
+// Variables
 //
-require 'z/includes/functions.inc';
-$message = false;
-require 'z/includes/db.php';
+$adminPassPost = inlinePost('adminPass');
+$fullNameEdit = null;
+$fullNamePost = inlinePost('fullName');
+$hash = null;
+$message = null;
+$passPost = inlinePost('pass');
+$userEdit = null;
+$userPost = inlinePost('user');
 if (isset($_POST['adminPass']) and ($_POST['adminPass'] == null or $_POST['adminPass'] == '')) {
     $message = 'Your password is required for all user maintenance.';
 }
-//
-// Prepare post data
-//
-$userPost = isset($_POST['user']) ? secure($_POST['user']) : null;
-$passPost = isset($_POST['pass']) ? secure($_POST['pass']) : null;
-$adminPassPost = isset($_POST['adminPass']) ? secure($_POST['adminPass']) : null;
-$fullNamePost = isset($_POST['fullName']) ? secure($_POST['fullName']) : null;
-$hash = null;
 if ($passPost != null) {
-    $cost = '09';
-    $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    $salt = '$2a$' . $cost . '$';
-    for ($i = 0; $i < 22; $i++) {
-        $salt.= $chars[rand(0, 61)];
-    }
-    $hash = crypt($passPost, $salt);
-    if (crypt($passPost, $hash) !== $hash) {
-        $hash = null;
-    }
+    $hash = password_hash($passPost, PASSWORD_DEFAULT);
 }
-$userEdit = false;
-$fullNameEdit = false;
 //
 // Test password authentication
 //
-require 'z/includes/db.php';
 $dbh = new PDO($db);
 $stmt = $dbh->prepare('SELECT pass FROM usersRecipients WHERE user=?');
 $stmt->setFetchMode(PDO::FETCH_ASSOC);
@@ -76,7 +64,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                 $stmt = $dbh->prepare('INSERT INTO usersRecipients (user, pass, fullName, userStatus) VALUES (?, ?, ?, ?)');
                 $stmt->execute(array($userPost, $hash, $fullNamePost, 1));
                 $dbh = null;
-                include 'z/includes/backUp.php';
+                mailAttachments($_SESSION['username'], $emailTo, $emailFrom, array($includesPath . '/databases/sms.sqlite', 'z/system/configuration.php'));
             }
         } else {
             $message = 'No user name was input.';
@@ -95,7 +83,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                 $stmt = $dbh->prepare('UPDATE usersRecipients SET pass=?, fullName=?, userStatus=? WHERE user=?');
                 $stmt->execute(array($hash, $fullNamePost, 1, $userPost));
                 $dbh = null;
-                include 'z/includes/backUp.php';
+                mailAttachments($_SESSION['username'], $emailTo, $emailFrom, array($includesPath . '/databases/sms.sqlite', 'z/system/configuration.php'));
             } else {
                 $message = 'The user name was not found.';
             }
@@ -125,7 +113,7 @@ if (strval(crypt($adminPassPost, $row['pass'])) === strval($row['pass'])) {
                     $stmt->execute(array($idUser));
                     $stmt = $dbh->query('VACUUM');
                     $dbh = null;
-                    include 'z/includes/backUp.php';
+                    mailAttachments($_SESSION['username'], $emailTo, $emailFrom, array($includesPath . '/databases/sms.sqlite', 'z/system/configuration.php'));
                 } else {
                     $message = 'The user name was not found.';
                 }
@@ -162,13 +150,12 @@ require 'z/includes/header2.inc';
 require 'z/includes/body.inc';
 ?>
 
-  <h4><a class="m" href="message.php">&nbsp;Message&nbsp;</a><a class="m" href="groups.php">&nbsp;Groups&nbsp;</a><a class="s" href="users.php">&nbsp;Users&nbsp;</a><a class="m" href="recipients.php">&nbsp;Recipients&nbsp;</a><a class="m" href="carriers.php">&nbsp;Carriers&nbsp;</a></h4>
+  <h4 class="m"><a class="m" href="message.php">&nbsp;Message&nbsp;</a><a class="m" href="groups.php">&nbsp;Groups&nbsp;</a><a class="s" href="users.php">&nbsp;Users&nbsp;</a><a class="m" href="recipients.php">&nbsp;Recipients&nbsp;</a><a class="m" href="carriers.php">&nbsp;Carriers&nbsp;</a></h4>
 <?php echoIfMessage($message); ?>
 
   <h1><span class="r">Users</span></h1>
 
 <?php
-require 'z/includes/db.php';
 $dbh = new PDO($db);
 $rowcount = null;
 $stmt = $dbh->query('SELECT user, pass, fullName FROM usersRecipients WHERE userStatus = 1 ORDER BY fullName');

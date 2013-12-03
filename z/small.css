@@ -2,12 +2,12 @@ body {
     font-size: 123.1%;
 }
 
-ol, ul, p, h1, h2, h3, h4, div.logo, form.search {
+div.logo, form.search, h1, h2, h3, h4, h6, ol, p, ul {
     padding-right: .5em;
     padding-left: .5em;
 }
 
-p.e {
+p.e, p.m {
     margin-right: .5em;
     margin-left: .5em;
 }
