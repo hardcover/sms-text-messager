@@ -10,4 +10,4 @@ For maximum portability, Messager runs from Linux and Windows web hosts. The req
 * PHP Data Objects, PDO for SQLite (php_pdo_sqlite)
 * Web server write privileges to the includes directory, which can be located outside the public HTML folders
 
-SMS Text Messager detects the user's browser to present an appropriate web page to cell phones and other networked devices. Use Messager anywhere, for example, to notify team members of a change in practice times or to keep parents informed how the team is doing in a competitive event.
+SMS Text Messager detects the user's browser to present an appropriate page format to cell phones and other devices. Use Messager anywhere, for example, to notify team members of a change in practice times or to keep parents informed how the team is doing in a competitive event.
