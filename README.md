@@ -1,6 +1,6 @@
 # SMS Text Messager
 
-A mobile and desktop PHP/JS app for groups, with sub and overlapping teams, to send text messages from their web site. Sends SMS at no charge to the sender through mobile carrier gateways for e-mail to SMS. SMS Text Messager detects the user's browser to present an appropriate page format to cell phones and other devices. Use Messager anywhere, for example, to notify team members of a change in practice times or to keep parents informed how the team is doing in a competitive event. Documentation is in the app. Screen shots are available at:
+A mobile and desktop PHP/JS app for groups, with sub and overlapping teams, to send text messages from their web site. Sends SMS at no charge to the sender through mobile carrier gateways for e-mail to SMS. Messager detects the user's browser to present an appropriate page format to cell phones and other devices. Use Messager anywhere, for example, to notify team members of a change in practice times or to keep parents informed how the team is doing in a competitive event. Documentation is in the app. Screen shots are available at:
 
    [http://smstextmessager.com/](http://smstextmessager.com/)
 
