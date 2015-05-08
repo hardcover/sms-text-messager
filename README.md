@@ -1,11 +1,5 @@
 # SMS Text Messager
 
-A mobile and desktop PHP/JS app for groups, with sub and overlapping teams, to send text messages from their web site. Sends SMS at no charge to the sender through mobile carrier gateways for e-mail to SMS. Messager detects the user's browser to present an appropriate page format to cell phones and other devices. Use Messager anywhere, for example, to notify team members of a change in practice times or to keep parents informed how the team is doing in a competitive event. Documentation is in the app. Screen shots are available at:
+The original SMS Text Messager was a web app for groups to send SMS text messages from their website at no charge through mobile carrier gateways for e-mail to SMS. The app was obsoleted by multi-platform messaging apps like BlackBerry Messenger. However, interest in the app did not go away. The inquiries were from people looking for a tiny program to integrate to an existing app, for example, for machinery to text the people responsible for monitoring and maintaining it. Text messages, apparently, are not going away.
 
-   [http://smstextmessager.com/](http://smstextmessager.com/)
-
-For maximum portability, Messager runs from Linux and Windows web hosts. The required configuration is common at hosting companies, especially cPanel/CentOS hosts: 
-
-* PHP, version 5.3.7 or newer
-* PHP Data Objects, PDO for SQLite (php_pdo_sqlite)
-* Web server write privileges to the includes directory, which can be located outside the public HTML folders
+So, SMS Text Messager is still here. For easy integration into existing programs, the current version is a single program to be executed from the command line with three argv variables, 1) from, 2) to, and 3) the message. The to address is the cell phone number followed by the appropriate carrier's e-mail to SMS address.
